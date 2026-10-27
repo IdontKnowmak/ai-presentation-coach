@@ -11,3 +11,6 @@ backend/__pycache__/
 backend/.venv/
 backend/venv/
 *.py[cod]
+
+# Serena MCP local project data
+.serena/

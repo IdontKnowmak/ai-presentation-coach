@@ -26,8 +26,8 @@ backend/
 
 Keep secrets in backend environment variables; never place API tokens in frontend code.
 
-
 ## 1. Start the backend (Windows PowerShell)
+
 ```powershell
 cd backend
 py -m venv .venv
@@ -39,7 +39,9 @@ uvicorn main:app --reload --port 8000
 ```
 
 ## 2. Start the frontend
+
 In a second terminal at the project root:
+
 ```powershell
 npm install
 Copy-Item .env.example .env
@@ -50,6 +52,7 @@ Frontend: http://localhost:5173
 Backend API docs: http://127.0.0.1:8000/docs
 
 ## 3. Database and authentication
+
 - Local development defaults to SQLite in `backend/presentation_coach.db`; for deployment, set `DATABASE_URL` to a Neon PostgreSQL connection string.
 - Email/password registration stores an Argon2 password hash, never the raw password.
 - API requests use a signed bearer token. Projects, presentations, and practice sessions are checked against the signed-in account.
@@ -61,4 +64,5 @@ For AI setup, add `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, and optionall
 See [backend/README.md](backend/README.md) for environment variables and API details.
 
 ## Current limitations
+
 Authentication, project CRUD, presentation upload, and practice endpoints are wired to the backend when configured. PDF/PPTX files are processed temporarily: the backend extracts slide text, saves the extracted text and metadata in the database, then deletes the temporary original file. Original PDF/PPTX files are not stored, so Google Drive is not required.
