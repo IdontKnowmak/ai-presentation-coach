@@ -1403,6 +1403,18 @@ function Dashboard({
         completed.reduce((sum, s) => sum + s.total_score, 0) / completed.length,
       )
     : null;
+  const practicedMinutes = completed.reduce((total, session) => {
+    if (!session.created_at || !session.completed_at) return total;
+    const startedAt = new Date(session.created_at).getTime();
+    const finishedAt = new Date(session.completed_at).getTime();
+    if (!Number.isFinite(startedAt) || !Number.isFinite(finishedAt) || finishedAt < startedAt)
+      return total;
+    return total + Math.round((finishedAt - startedAt) / 60000);
+  }, 0);
+  const practicedTimeLabel =
+    practicedMinutes >= 60
+      ? `${Math.floor(practicedMinutes / 60)} ชม. ${practicedMinutes % 60} นาที`
+      : `${practicedMinutes} นาที`;
   const recent = completed.slice(0, 8).reverse();
   return (
     <>
@@ -1490,8 +1502,8 @@ function Dashboard({
         <Stat
           icon={Clock3}
           label="Time practiced"
-          value="—"
-          note="ยังไม่ได้เก็บเวลาฝึก"
+          value={practicedTimeLabel}
+          note="รวมจากรอบฝึกที่เสร็จแล้ว"
           tone="orange"
         />
       </div>
