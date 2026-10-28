@@ -1873,11 +1873,6 @@ function PracticeRoom({
         eyebrow="รอบฝึกซ้อม"
         title="ห้องฝึกซ้อม"
         subtitle="ลองเรียบเรียงความคิดและตอบคำถามทีละข้อ เพื่อพัฒนาการนำเสนอของคุณ"
-        action={
-          <div className="session-tag">
-            <span /> กำลังฝึกซ้อม
-          </div>
-        }
       />
       <div className="practice-layout">
         <section className="panel practice-main">
@@ -2090,10 +2085,6 @@ function PracticeRoom({
           </div>
         </section>
         <aside className="panel coach-panel">
-          <div className="coach-avatar">
-            <Sparkles size={24} />
-            <span />
-          </div>
           <h3>โค้ช AI ของคุณ</h3>
           <p>ฉันจะช่วยให้คุณเตรียมพร้อมและมั่นใจในการนำเสนอมากขึ้น</p>
           <div className="coach-divider" />
