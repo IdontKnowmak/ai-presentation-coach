@@ -275,9 +275,12 @@ function App() {
     setNotice("");
   };
   const closeGuide = () => {
+    const guidePreferenceKey = user?.id
+      ? `apc_hide_welcome_guide_${user.id}`
+      : "apc_hide_welcome_guide";
     if (dontShowGuideAgain)
-      localStorage.setItem("apc_hide_welcome_guide", "true");
-    else localStorage.removeItem("apc_hide_welcome_guide");
+      localStorage.setItem(guidePreferenceKey, "true");
+    else localStorage.removeItem(guidePreferenceKey);
     setShowGuide(false);
   };
   const openGuide = () => {
@@ -547,6 +550,9 @@ function App() {
       localStorage.setItem("apc_refresh_token", result.refresh_token);
     setAuthToken(result.access_token);
     setUser(result.user);
+    const guidePreferenceKey = `apc_hide_welcome_guide_${result.user.id}`;
+    setShowGuide(localStorage.getItem(guidePreferenceKey) !== "true");
+    setDontShowGuideAgain(false);
     setAuthChecking(true);
   }, []);
   const handleLogout = () => {
