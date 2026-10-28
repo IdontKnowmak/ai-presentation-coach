@@ -2380,7 +2380,6 @@ function Results({ projects, sessions = [], navigate, startPractice }) {
                   </div>
                   <p>
                     ค่าเฉลี่ยจากรอบฝึกที่เสร็จสมบูรณ์ {completed.length} รอบ
-                    ไม่มีการใช้คะแนนตัวอย่าง
                   </p>
                 </div>
                 <div className="result-orb">
