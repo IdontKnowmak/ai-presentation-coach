@@ -1019,6 +1019,17 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
 }
+.project-card-tools {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.edit-project-button {
+  color: #7056d9;
+}
+.edit-project-button:hover {
+  background: #e9e3ff;
+}
 .project-card-top.purple {
   background: #f4f0ff;
 }

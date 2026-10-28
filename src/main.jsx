@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   CircleHelp,
   Trash2,
+  Pencil,
   X,
   Menu,
   Target,
@@ -191,6 +192,10 @@ function App() {
   const [authChecking, setAuthChecking] = useState(true);
   const [query, setQuery] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editType, setEditType] = useState("University");
+  const [savingProject, setSavingProject] = useState(false);
   const [showGuide, setShowGuide] = useState(
     () => localStorage.getItem("apc_hide_welcome_guide") !== "true",
   );
@@ -592,6 +597,64 @@ function App() {
       );
     } catch (err) {
       setNotice(err.message);
+    }
+  };
+  const openEditProject = (project) => {
+    setEditingProject(project);
+    setEditTitle(project.title || "");
+    setEditType(project.type || "University");
+  };
+  const updateProject = async (e) => {
+    e.preventDefault();
+    if (!editingProject || savingProject) return;
+
+    const title = editTitle.trim();
+    if (!title) {
+      setNotice("กรุณาระบุชื่อโปรเจกต์");
+      return;
+    }
+
+    try {
+      setSavingProject(true);
+      const data = await apiFetch(`/api/projects/${editingProject.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title, project_type: editType }),
+      });
+      const updated = toProject(data);
+      setProjects((previous) =>
+        previous.map((project) =>
+          Number(project.id) === Number(editingProject.id)
+            ? {
+                ...project,
+                ...updated,
+                questions: project.questions,
+                score: project.score,
+                color: project.color,
+                presentations: project.presentations,
+                sessions: project.sessions,
+              }
+            : project,
+        ),
+      );
+      setSelectedProject((previous) =>
+        Number(previous?.id) === Number(editingProject.id)
+          ? {
+              ...previous,
+              ...updated,
+              questions: previous.questions,
+              score: previous.score,
+              color: previous.color,
+              presentations: previous.presentations,
+              sessions: previous.sessions,
+            }
+          : previous,
+      );
+      setEditingProject(null);
+      setNotice("บันทึกการแก้ไขโปรเจกต์แล้ว โดยคงไฟล์และประวัติการฝึกไว้");
+    } catch (err) {
+      setNotice(err.message);
+    } finally {
+      setSavingProject(false);
     }
   };
   const startPractice = async (project) => {
@@ -1034,6 +1097,7 @@ function App() {
               setShowCreate={setShowCreate}
               startPractice={startPractice}
               removeProject={removeProject}
+              openEditProject={openEditProject}
               setSelectedProject={setSelectedProject}
               navigate={navigate}
             />
@@ -1181,6 +1245,74 @@ function App() {
               </button>
             </div>
           </section>
+        </div>
+      )}
+      {editingProject && (
+        <div
+          className="modal-backdrop"
+          onClick={() => !savingProject && setEditingProject(null)}
+        >
+          <form
+            className="modal"
+            onSubmit={updateProject}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => !savingProject && setEditingProject(null)}
+              disabled={savingProject}
+              aria-label="ปิดหน้าต่างแก้ไข"
+            >
+              <X size={18} />
+            </button>
+            <div className="modal-icon">
+              <Pencil size={21} />
+            </div>
+            <h2>แก้ไขโปรเจกต์</h2>
+            <p>เปลี่ยนชื่อหรือประเภทได้ โดยไม่ลบไฟล์และประวัติการฝึก</p>
+            <label htmlFor="edit-project-title">ชื่อโปรเจกต์</label>
+            <input
+              id="edit-project-title"
+              autoFocus
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              maxLength={160}
+              placeholder="เช่น โปรเจกต์จบการศึกษา"
+              required
+              disabled={savingProject}
+            />
+            <label htmlFor="edit-project-type">ประเภทโปรเจกต์</label>
+            <select
+              id="edit-project-type"
+              value={editType}
+              onChange={(e) => setEditType(e.target.value)}
+              disabled={savingProject}
+            >
+              <option value="University">มหาวิทยาลัย</option>
+              <option value="Business">ธุรกิจ</option>
+              <option value="Technology">เทคโนโลยี</option>
+              <option value="Personal">ส่วนตัว</option>
+            </select>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setEditingProject(null)}
+                disabled={savingProject}
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={savingProject || !editTitle.trim()}
+              >
+                <CheckCircle2 size={16} />
+                {savingProject ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
       {showCreate && (
@@ -1543,6 +1675,7 @@ function Projects({
   setShowCreate,
   startPractice,
   removeProject,
+  openEditProject,
   setSelectedProject,
   navigate,
 }) {
@@ -1583,13 +1716,24 @@ function Projects({
                 <div className={`file-icon ${p.color}`}>
                   <FileText size={22} />
                 </div>
-                <button
-                  className="more-button"
-                  onClick={() => removeProject(p.id)}
-                  title="ลบโปรเจกต์"
-                >
-                  <Trash2 size={17} />
-                </button>
+                <div className="project-card-tools">
+                  <button
+                    className="more-button edit-project-button"
+                    onClick={() => openEditProject(p)}
+                    title="แก้ไขโปรเจกต์"
+                    aria-label={`แก้ไขโปรเจกต์ ${p.title}`}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    className="more-button"
+                    onClick={() => removeProject(p.id)}
+                    title="ลบโปรเจกต์"
+                    aria-label={`ลบโปรเจกต์ ${p.title}`}
+                  >
+                    <Trash2 size={17} />
+                  </button>
+                </div>
               </div>
               <div className="project-card-body">
                 <span className="type-tag">{typeLabels[p.type] || p.type}</span>
