@@ -194,7 +194,9 @@ function App() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [editType, setEditType] = useState("University");
+  const [newDescription, setNewDescription] = useState("");
   const [savingProject, setSavingProject] = useState(false);
   const [showGuide, setShowGuide] = useState(
     () => localStorage.getItem("apc_hide_welcome_guide") !== "true",
@@ -588,12 +590,17 @@ function App() {
     try {
       const data = await apiFetch("/api/projects", {
         method: "POST",
-        body: JSON.stringify({ title, project_type: newType }),
+        body: JSON.stringify({
+          title,
+          description: newDescription.trim(),
+          project_type: newType,
+        }),
       });
       const p = toProject(data);
       setProjects((prev) => [p, ...prev]);
       setSelectedProject(p);
       setNewTitle("");
+      setNewDescription("");
       setShowCreate(false);
       navigate("My Projects");
       setNotice(
@@ -608,6 +615,7 @@ function App() {
   const openEditProject = (project) => {
     setEditingProject(project);
     setEditTitle(project.title || "");
+    setEditDescription(project.description || "");
     setEditType(project.type || "University");
   };
   const updateProject = async (e) => {
@@ -624,7 +632,11 @@ function App() {
       setSavingProject(true);
       const data = await apiFetch(`/api/projects/${editingProject.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ title, project_type: editType }),
+        body: JSON.stringify({
+          title,
+          description: editDescription.trim(),
+          project_type: editType,
+        }),
       });
       const updated = toProject(data);
       setProjects((previous) =>
@@ -1288,6 +1300,16 @@ function App() {
               required
               disabled={savingProject}
             />
+            <label htmlFor="edit-project-description">คำอธิบายโปรเจกต์ (ไม่บังคับ)</label>
+            <textarea
+              id="edit-project-description"
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              maxLength={5000}
+              rows={3}
+              placeholder="อธิบายหัวข้อ เป้าหมาย หรือสิ่งที่ต้องการฝึกนำเสนอ"
+              disabled={savingProject}
+            />
             <label htmlFor="edit-project-type">ประเภทโปรเจกต์</label>
             <select
               id="edit-project-type"
@@ -1347,6 +1369,14 @@ function App() {
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="เช่น โปรเจกต์จบการศึกษา"
               required
+            />
+            <label>คำอธิบายโปรเจกต์ (ไม่บังคับ)</label>
+            <textarea
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              maxLength={5000}
+              rows={3}
+              placeholder="อธิบายหัวข้อ เป้าหมาย หรือสิ่งที่ต้องการฝึกนำเสนอ"
             />
             <label>ประเภทโปรเจกต์</label>
             <select
@@ -1756,6 +1786,9 @@ function Projects({
               <div className="project-card-body">
                 <span className="type-tag">{typeLabels[p.type] || p.type}</span>
                 <h3>{p.title}</h3>
+                {p.description ? (
+                  <p className="project-description">{p.description}</p>
+                ) : null}
                 <p>อัปเดตเมื่อ {p.date}</p>
                 <div className="project-card-meta">
                   <span>

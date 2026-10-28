@@ -1065,6 +1065,18 @@ button:disabled {
   color: #999caf;
   margin: 0 0 16px;
 }
+.project-card-body > p.project-description {
+  color: #666b80;
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .project-card-meta {
   display: flex;
   gap: 12px;
